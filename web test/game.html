@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        canvas {
+            border: 1px solid #000;
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+    <title>Car Dodging Game</title>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <script>
+        // 获取Canvas元素和上下文
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // 车辆对象
+        const car = {
+            x: canvas.width / 2 - 25,
+            y: canvas.height - 50,
+            width: 50,
+            height: 50,
+            color: "#00F",
+            speed: 5
+        };
+
+        // 障碍物数组
+        const obstacles = [];
+
+        // 监听鼠标移动事件
+        canvas.addEventListener("mousemove", moveCar);
+
+        // 随机生成障碍物
+        function generateObstacle() {
+            const obstacleWidth = 50;
+            const obstacleX = Math.random() * (canvas.width - obstacleWidth);
+            const obstacleY = -20;
+            const obstacle = {
+                x: obstacleX,
+                y: obstacleY,
+                width: obstacleWidth,
+                height: 20,
+                color: "#F00",
+                speed: 2
+            };
+            obstacles.push(obstacle);
+        }
+
+        // 移动车辆
+        function moveCar(event) {
+            car.x = event.clientX - canvas.getBoundingClientRect().left - car.width / 2;
+        }
+
+        // 游戏主循环
+        function gameLoop() {
+            // 清除画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 移动和绘制障碍物
+            for (let i = 0; i < obstacles.length; i++) {
+                const obstacle = obstacles[i];
+                obstacle.y += obstacle.speed;
+
+                // 检测碰撞
+                if (
+                    car.x < obstacle.x + obstacle.width &&
+                    car.x + car.width > obstacle.x &&
+                    car.y < obstacle.y + obstacle.height &&
+                    car.y + car.height > obstacle.y
+                ) {
+                    alert("Game Over!");
+                    obstacles.length = 0; // 清空障碍物数组
+                }
+
+                // 绘制障碍物
+                ctx.fillStyle = obstacle.color;
+                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            }
+
+            // 移动和绘制车辆
+            ctx.fillStyle = car.color;
+            ctx.fillRect(car.x, car.y, car.width, car.height);
+
+            // 生成障碍物的概率
+            if (Math.random() < 0.02) {
+                generateObstacle();
+            }
+
+            // 移除超出画布的障碍物
+            obstacles.forEach((obstacle, index) => {
+                if (obstacle.y > canvas.height) {
+                    obstacles.splice(index, 1);
+                }
+            });
+
+            // 循环调用游戏主循环
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 启动游戏
+        gameLoop();
+    </script>
+</body>
+</html>
